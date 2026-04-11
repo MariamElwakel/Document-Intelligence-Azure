@@ -3,7 +3,7 @@ import streamlit as st
 from layout_model import analyze_layout
 from output_format import render_layout_results
 from general_document_model import analyze_general
-
+from ocr_model import analyze_ocr
 
 def file_uploader(label="Upload a document (PDF, JPEG, PNG, TIFF, BMP)"):
     """Single-file uploader used by most models."""
@@ -63,15 +63,18 @@ def handle_general():
             
 
 def handle_ocr():
-    """"
+    """
     Handler for OCR / Read model
     """
-    st.info("OCR / Read model — not yet implemented.")
     uploaded_file = file_uploader()
     if uploaded_file:
-        st.warning("OCR model not yet implemented.")
-
-        
+        with st.spinner("Analyzing OCR (Reading Document)…"):
+            try:
+                result = analyze_ocr(uploaded_file.read())
+                render_layout_results(result)
+            except Exception as e:
+                st.error("Analysis failed. Check your file format or Azure credentials.")
+                st.exception(e)
 
 
 def handle_invoices():
