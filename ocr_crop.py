@@ -8,8 +8,8 @@ import numpy as np
 
 load_dotenv()
 
-endpoint = os.getenv("OCR_ENDPOINT")
-key = os.getenv("OCR_KEY")
+endpoint = os.getenv("ENDPOINT")
+key = os.getenv("KEY")
 
 client = DocumentIntelligenceClient(endpoint, AzureKeyCredential(key))
 

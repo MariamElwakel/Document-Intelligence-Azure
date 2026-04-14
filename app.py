@@ -4,6 +4,7 @@ from layout_model import analyze_layout
 from output_format import render_layout_results
 from general_document_model import analyze_general
 from ocr_model import analyze_ocr
+from custom_model import custom_model_app
 
 def file_uploader(label="Upload a document (PDF, JPEG, PNG, TIFF, BMP)"):
     """Single-file uploader used by most models."""
@@ -101,11 +102,7 @@ def handle_custom():
     """
     Handler for Custom Model — expects multiple files for training.
     """
-    st.info("Custom Model requires at least 5 training documents.")
-    files = multi_file_uploader(min_files=5)
-    if files:
-        st.success(f"{len(files)} documents ready.")
-        st.warning("Custom model not yet implemented.")
+    custom_model_app()
 
 
 
