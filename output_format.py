@@ -133,3 +133,83 @@ def render_layout_results(result: dict):
                 for fig in result["figures"]:
                     caption = fig.get("caption") or "No caption"
                     st.markdown(f"- **Figure {fig['id']}**: {caption}")
+
+
+# Receipt helpers
+def render_receipt_results(result: dict):
+ 
+    st.markdown("---")
+ 
+    receipts = result.get("receipts", [])
+ 
+    # Summary metrics
+    total_sum = sum(r["total"] for r in receipts if r.get("total") is not None)
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Pages", result.get("page_count", "—"))
+    col2.metric("Receipts found", len(receipts))
+    col3.metric("Combined total", f"{total_sum:.2f}" if total_sum else "—")
+ 
+    st.markdown("---")
+ 
+    json_col, structured_col = st.columns(2, gap="large")
+ 
+    # LEFT: raw JSON
+    with json_col:
+        st.subheader("Raw JSON output")
+        with st.expander("Full result JSON", expanded=False):
+            st.json(result)
+ 
+    # RIGHT: structured view
+    with structured_col:
+        st.subheader("Structured view")
+ 
+        if not receipts:
+            st.info("No receipts were extracted from this document.")
+            return
+ 
+        for receipt in receipts:
+            label = f"Receipt #{receipt['receipt_index'] + 1}"
+            if receipt.get("merchant_name"):
+                label += f" — {receipt['merchant_name']}"
+            if receipt.get("total") is not None:
+                label += f" (Total: {receipt['total']:.2f})"
+ 
+            with st.expander(label, expanded=True):
+ 
+                # Header info table
+                header_rows = [
+                    {"Field": "Receipt Type", "Value": receipt.get("receipt_type") or "—", "Confidence": "—"},
+                    {"Field": "Country", "Value": receipt.get("country_region") or "—", "Confidence": "—"},
+                    {"Field": "Merchant", "Value": receipt.get("merchant_name") or "—",
+                     "Confidence": f"{receipt['merchant_name_confidence']:.2f}" if receipt.get("merchant_name_confidence") else "—"},
+                    {"Field": "Address", "Value": receipt.get("merchant_address") or "—", "Confidence": "—"},
+                    {"Field": "Phone", "Value": receipt.get("merchant_phone") or "—", "Confidence": "—"},
+                    {"Field": "Date", "Value": receipt.get("transaction_date") or "—",
+                     "Confidence": f"{receipt['transaction_date_confidence']:.2f}" if receipt.get("transaction_date_confidence") else "—"},
+                    {"Field": "Time", "Value": receipt.get("transaction_time") or "—", "Confidence": "—"},
+                    {"Field": "Subtotal", "Value": f"{receipt['subtotal']:.2f}" if receipt.get("subtotal") is not None else "—",
+                     "Confidence": f"{receipt['subtotal_confidence']:.2f}" if receipt.get("subtotal_confidence") else "—"},
+                    {"Field": "Tax", "Value": f"{receipt['tax']:.2f}" if receipt.get("tax") is not None else "—",
+                     "Confidence": f"{receipt['tax_confidence']:.2f}" if receipt.get("tax_confidence") else "—"},
+                    {"Field": "Tip", "Value": f"{receipt['tip']:.2f}" if receipt.get("tip") is not None else "—",
+                     "Confidence": f"{receipt['tip_confidence']:.2f}" if receipt.get("tip_confidence") else "—"},
+                    {"Field": "Total", "Value": f"{receipt['total']:.2f}" if receipt.get("total") is not None else "—",
+                     "Confidence": f"{receipt['total_confidence']:.2f}" if receipt.get("total_confidence") else "—"},
+                ]
+                st.dataframe(pd.DataFrame(header_rows), hide_index=True, width='stretch')
+ 
+                # Line items
+                if receipt.get("items"):
+                    st.markdown("**Line items**")
+                    df_items = pd.DataFrame([
+                        {
+                            "Description": item.get("description") or "—",
+                            "Qty": item.get("quantity") if item.get("quantity") is not None else "—",
+                            "Unit Price": f"{item['price']:.2f}" if item.get("price") is not None else "—",
+                            "Total": f"{item['total_price']:.2f}" if item.get("total_price") is not None else "—",
+                        }
+                        for item in receipt["items"]
+                    ])
+                    st.dataframe(df_items, hide_index=True, width='stretch')
+                else:
+                    st.caption("No line items extracted.")

@@ -1,10 +1,11 @@
 import streamlit as st
 
 from layout_model import analyze_layout
-from output_format import render_layout_results
+from output_format import render_layout_results,render_receipt_results
 from general_document_model import analyze_general
 from ocr_model import analyze_ocr
 from custom_model import custom_model_app
+from receipt_model import analyze_receipt
 
 def file_uploader(label="Upload a document (PDF, JPEG, PNG, TIFF, BMP)"):
     """Single-file uploader used by most models."""
@@ -90,12 +91,16 @@ def handle_invoices():
 
 
 def handle_receipts():
-    """
-    Handler for Receipts model"""
-    st.info("Receipts model — not yet implemented.")
+    """Handler for Receipts model."""
     uploaded_file = file_uploader()
     if uploaded_file:
-        st.warning("Receipts model not yet implemented.")
+        with st.spinner("Analyzing receipt…"):
+            try:
+                result = analyze_receipt(uploaded_file.read())
+                render_receipt_results(result)
+            except Exception as e:
+                st.error("Analysis failed. Check your file format or Azure credentials.")
+                st.exception(e)
 
 
 def handle_custom():
