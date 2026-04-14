@@ -83,11 +83,26 @@ def handle_invoices():
     """
     Handler for Invoices model
     """
-    st.info("Invoices model — not yet implemented.")
     uploaded_file = file_uploader()
-    if uploaded_file:
-        st.warning("Invoices model not yet implemented.")
 
+    if uploaded_file:
+        with st.spinner("Analyzing invoice…"):
+            try:
+                file_bytes = uploaded_file.read()
+
+                # Call Azure invoice model
+                result = analyze_invoice(file_bytes)
+
+                # 👇 TEMP: show raw JSON first (for debugging)
+                # st.subheader("Raw Output")
+                # st.json(result)
+
+                # 👇 optional: later we improve UI formatting
+                render_invoice_results(result)
+
+            except Exception as e:
+                st.error("Invoice analysis failed. Check file format or Azure credentials.")
+                st.exception(e)
 
 
 def handle_receipts():
