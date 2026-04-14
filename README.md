@@ -49,7 +49,7 @@ The app currently supports:
 |-- ocr_crop.py                # OCR on cropped label regions
 |-- requirements.txt           # Python dependencies
 |-- README.md                  # Project documentation
-|-- sample_invoice_obfuscated.pdf
+|-- sample_invoice.pdf
 |-- test.pdf
 |-- tst.pdf
 ```
