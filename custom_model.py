@@ -235,7 +235,9 @@ def custom_model_app():
         progress = st.progress(0, text="Uploading Files...")
 
         for i, file in enumerate(uploaded_files):
-            png_name = st.session_state.file_png_map[file.name]
+            png_name = st.session_state.file_png_map.get(
+                file.name, file.name.rsplit(".", 1)[0] + ".png"
+            )
             progress.progress(i / total, text=f"Uploading {png_name}...")
 
             # Convert to PNG bytes
